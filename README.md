@@ -1,3 +1,5 @@
+Demo: http://dagnelies.github.io/skytroops/bin/
+
 # Sky Troops...
 
 ...is a HTML5 game targeted at mobile and browsers alike.
