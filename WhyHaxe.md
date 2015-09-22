@@ -1,12 +1,12 @@
 The game is programmed in HaXe and based on the Createjs library.
 
-= Why? Why not? =
+# Why? Why not?
 
 It is basically a historical reason.
 The code was based on a space shooter prototype made in mid-2013.
 At that time, HTML5 and related technologies were still fairly young and HaXe/createjs were chosen.
 
-= Thoughts =
+# Thoughts
 
 Developing with HaXe and Createjs still is a solid choice.
 Both are mature and working well.
@@ -22,7 +22,7 @@ It's a bit of a shame HaXe is still such an outlier, it's really a good language
 I would even say the best I've encountered so far (java,c#,javascript,python,ruby,c++,haskell,lisp...) but this is merely my personal opinion so please avoid any flame war.
 You've everything you need in it. However the ecosystem (community, tools, libs) is severly lacking due to its low exposure.
 
-= Alternatives =
+# Alternatives #
 
 I think having a statically typed language is a great help.
 It provides mainly code safety and better code structure.

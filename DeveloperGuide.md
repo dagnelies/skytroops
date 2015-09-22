@@ -1,4 +1,4 @@
-= Packages =
+# Packages
 
 * `skytroops.defs` - The "parametrization" of everything (ships, bullets, levels...)
 * `skytroops.enemies` - Enemy Ships
@@ -8,7 +8,7 @@
 * `skytroops.stuff` - In-game "stuff" (player ship, bullet, ...)
 * `skytroops.*` - Core classes (game, resources, sound, input...)
 
-= Tinkerer's guide =
+# Tinkerer's guide
 
 A lot of things are the same, just differently parametrized.
 You can configure about anything in the game in the `skytroops.defs` package.
@@ -21,14 +21,14 @@ From the picture of the ships, to the velocity of the bullets, to the waves of e
 * Upgrades
 
 
-= skytroops.Game =
+# skytroops.Game
 
 This is the "orchestrating" class.
 It handles the flow between the various screens, 
 keeps track of the player's progress (levels, coins, upgrades...),
 and triggers the core game loop when necessary.
 
-= Core Stuff =
+# Core Stuff
 
 The game is made out of various screens:
 
@@ -47,7 +47,7 @@ And "levels":
 
 Each level is almost the same, but is nevertheless an independent class in order to allow customization.
 
-= Level =
+# Level
 
 All of the levels are based on the base class `skytroops.levels.Level`.
 It is the most important class, encapsulating the behavior of the game.
@@ -67,7 +67,7 @@ This covers updating:
 
 The two ways to end a level are calling `onWin()` or `onDie()` within the level itself.
 
-= Waves =
+# Waves
 
 Waves define or generate which enemies appear where, when and how.
 A wave can be defined by:
@@ -77,13 +77,7 @@ A wave can be defined by:
 * the formation (five in a diagonal line)
 * the origin (from the top left corner)
 
-Each time, the countdown of the wave will be decreased, until it reaches <= 0, which releases the enemies.
+Each time, the countdown of the wave will be decreased, until it reaches <# 0, which releases the enemies.
 When ennemies are released, the method `onSpawn(ships)` is called.
 
 Within a level, waves are declared based on delays between each other, so that updating/popping the first one is enough.
-
-= Enemies =
-
-= Player Ship =
-
-The player ship 
