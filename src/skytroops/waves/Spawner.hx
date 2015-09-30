@@ -8,13 +8,14 @@ import skytroops.AIShip;
 import skytroops.defs.Direction;
 import skytroops.defs.Motion;
 import skytroops.defs.ShipDef;
+import skytroops.defs.SpawnDef;
 import skytroops.defs.WaveDef;
 import skytroops.Game;
 import skytroops.Resources;
 import skytroops.defs.Formation;
 /**
  * ...
- * @author arnaud
+ * @author dagnelies
  */
 
 
@@ -24,14 +25,28 @@ import skytroops.defs.Formation;
 
 class Spawner
 {
-	//var queue :Array<Wave>;
-	//var t = 0.0;
+	var spawns :Array<SpawnDef>;
+	var t = 0.0;
+	var spawns_index = 0;
 	
-	public function new()
+	public function new(spawns)
 	{
-		//queue = [];
+		this.spawns = spawns;
 	}
 
+	public function update(dt)
+	{
+		t += dt;
+		while ( !isFinished() && t > spawns[spawns_index].t ) {
+			launch(spawns[spawns_index].wave );
+			spawns_index++;
+		}
+	}
+	
+	public function isFinished()
+	{
+		return spawns_index >= spawns.length;
+	}
 	
 	function getRadius(image) :Float
 	{
@@ -170,8 +185,8 @@ class Spawner
 					p.y = i * r;
 				
 				case RANDOM:
-					p.x = Math.random() * 500;
-					p.y = Math.random() * 500;
+					p.x = Math.random() * (Game.WIDTH - 2*r);
+					p.y = Math.random() * (Game.WIDTH - 2*r);
 			}
 		}
 		

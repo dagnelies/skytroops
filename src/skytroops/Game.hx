@@ -2,6 +2,7 @@ package skytroops;
 import createjs.easeljs.Container;
 import createjs.easeljs.Stage;
 import haxe.Timer;
+import skytroops.defs.LevelDef;
 import skytroops.defs.ShipDef;
 import skytroops.levels.Grass;
 import skytroops.waves.Spawner;
@@ -10,13 +11,14 @@ import skytroops.waves.Spawner;
 
 /**
  * ...
- * @author arnaud
+ * @author dagnelies
  */
 class Game extends Container
 {
 	public static var SPEED = 50.0;
 	
 	var input :Input;
+	var level :LevelDef;
 	
 	/*
 	// Full HD
@@ -58,10 +60,11 @@ class Game extends Container
 	var timer :Timer;
 	
 	
-	public function new(input) 
+	public function new(input,level) 
 	{
 		super();
 		this.input = input;
+		this.level = level;
 	}
 	
 	
@@ -73,7 +76,7 @@ class Game extends Container
 
 	public function init()
 	{
-		bg = new BackgroundScrolling();
+		bg = new BackgroundScrolling( level.bg_img );
 		addChild(bg);
 		
 		coins = new Container();
@@ -101,7 +104,7 @@ class Game extends Container
 		addChild(debug_layer);
 		
 		
-		spawner = new Spawner();
+		spawner = new Spawner(level.spawns);
 		spawner.onSpawn = onSpawn;
 	
 		//stage.update();
@@ -117,7 +120,7 @@ class Game extends Container
 	function onSpawn(ship :AIShip)
 	{
 		enemies.add(ship);
-		ship.vy += Game.SPEED / 2;
+		ship.vy += Game.SPEED;
 		ship.onDestroyed = onDestroyed;
 	}
 	
@@ -133,29 +136,8 @@ class Game extends Container
 		trace(seconds);
 		seconds++;
 		
-		if ( seconds % 10 == 0 )
-		{
-			wave_index++;
-			if ( wave_index == WAVES )
-			{
-				win();
-			}
-		}
-		
-		if ( wave_index < WAVES )
-		{
-			var wave = Grass.buildWave(wave_index);
-			if( wave != null )
-				spawner.launch( wave );
-		}
-		else
-		{
-			if ( enemies.size() == 0 )
-				win();
-		}
-		
-		
-		
+		if ( spawner.isFinished() &&  enemies.size() == 0 )
+			win();
 	}
 	
 	
@@ -193,14 +175,10 @@ class Game extends Container
 	{
 		updateDebugInfo();
 		Sound.update(dt);
-		//spawner.update(dt);
 		
 		bg.update(dt);
+		spawner.update(dt);
 		
-		/*
-		if ( Math.random() < ai_frequency * dt )
-			enemies.add(new AIShip());
-		*/
 		enemies.update(dt);
 		var has_shot = false;
 		for ( e in enemies )

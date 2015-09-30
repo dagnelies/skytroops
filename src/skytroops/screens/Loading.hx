@@ -6,7 +6,7 @@ import skytroops.gui.Label;
 import skytroops.gui.Button;
 /**
  * ...
- * @author arnaud
+ * @author dagnelies
  */
 class Loading extends Container
 {

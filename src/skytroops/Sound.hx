@@ -5,7 +5,7 @@ import js.Lib;
 
 /**
  * ...
- * @author arnaud
+ * @author dagnelies
  */
 class Sound
 {

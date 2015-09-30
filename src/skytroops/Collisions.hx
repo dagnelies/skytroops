@@ -2,7 +2,7 @@ package skytroops;
 
 /**
  * ...
- * @author arnaud
+ * @author dagnelies
  */
 class Collisions
 {

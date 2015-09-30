@@ -42,7 +42,7 @@ class AIShip extends Ship
 			angle += va * dt;
 			vx = Math.cos(angle) * def.speed;
 			vy = Math.sin(angle) * def.speed;
-			vy += Game.SPEED/2;
+			vy += Game.SPEED;
 		}
 		
 		super.update(dt);

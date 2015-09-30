@@ -52,4 +52,31 @@ class Ships
 		weapon: null
 	}
 	
+	public static var MINE :ShipDef = {
+		image: "img/ships/mine.png",
+		shadow: null,
+		speed: 0,
+		armor: 10,
+		xp: 1,
+		weapon: null
+	}
+	
+	public static var TANK_LIGHT :ShipDef = {
+		image: "img/ships/tank_1.png",
+		shadow: null,
+		speed: 0,
+		armor: 3,
+		xp: 2,
+		weapon: Weapons.MACHINE_GUN
+	}
+	
+	public static var TANK_HEAVY :ShipDef = {
+		image: "img/ships/tank_2.png",
+		shadow: null,
+		speed: 0,
+		armor: 5,
+		xp: 3,
+		weapon: Weapons.MISSILE_LAUNCHER
+	}
+	
 }

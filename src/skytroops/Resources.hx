@@ -8,7 +8,7 @@ import skytroops.defs.Ships;
 
 /**
  * ...
- * @author arnaud
+ * @author dagnelies
  */
 class Resources
 {
@@ -48,6 +48,9 @@ class Resources
 		queue.loadFile(Ships.TROOPER.image);
 		queue.loadFile(Ships.WEAKLING.image);
 		queue.loadFile(Ships.FOLLOWER.image);
+		queue.loadFile(Ships.MINE.image);
+		queue.loadFile(Ships.TANK_LIGHT.image);
+		queue.loadFile(Ships.TANK_HEAVY.image);
 		
 		queue.loadFile("img/ships/ufo_grabber.png");
 		

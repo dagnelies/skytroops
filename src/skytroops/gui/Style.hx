@@ -2,7 +2,7 @@ package skytroops.gui;
 
 /**
  * ...
- * @author arnaud
+ * @author dagnelies
  */
 class Style
 {

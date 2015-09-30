@@ -36,7 +36,7 @@ class Waves
 	}
 	
 	public static var WEAKLING_TR_I :WaveDef = {
-		n: 4,
+		n: 2,
 		ship: Ships.WEAKLING,
 		formation: Formation.BSLASH,
 		from: Direction.TOP_RIGHT
@@ -76,4 +76,50 @@ class Waves
 		formation: Formation.RANDOM,
 		from: Direction.BOTTOM
 	}
+	
+	public static var SHOOTER_I :WaveDef = {
+		n: 1,
+		ship: Ships.GUNNER,
+		formation: Formation.HORIZONTAL,
+		from: Direction.TOP
+	}
+	
+	public static var SHOOTER_II :WaveDef = {
+		n: 2,
+		ship: Ships.GUNNER,
+		formation: Formation.HORIZONTAL,
+		from: Direction.TOP,
+		motion: Motion.SPREAD
+	}
+	
+	public static var SHOOTER_III :WaveDef = {
+		n: 3,
+		ship: Ships.GUNNER,
+		formation: Formation.DOWN,
+		from: Direction.TOP,
+		motion: Motion.SPREAD
+	}
+	
+	
+	public static var MINES :WaveDef = {
+		n: 4,
+		ship: Ships.MINE,
+		formation: Formation.HORIZONTAL,
+		from: Direction.TOP
+	}
+	
+	public static var TANK_L_I :WaveDef = {
+		n: 1,
+		ship: Ships.TANK_LIGHT,
+		formation: Formation.HORIZONTAL,
+		from: Direction.TOP
+	}
+	
+	public static var TANK_H_I :WaveDef = {
+		n: 1,
+		ship: Ships.TANK_HEAVY,
+		formation: Formation.HORIZONTAL,
+		from: Direction.TOP
+	}
+	
 }

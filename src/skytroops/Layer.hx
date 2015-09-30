@@ -4,7 +4,7 @@ import haxe.Timer;
 
 /**
  * ...
- * @author arnaud
+ * @author dagnelies
  */
 class Layer<T :Obj>
 {

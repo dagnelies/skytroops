@@ -6,7 +6,7 @@ import createjs.easeljs.SpriteSheet;
 
 /**
  * ...
- * @author arnaud
+ * @author dagnelies
  */
 
 class Obj extends Container implements Entity

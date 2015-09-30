@@ -7,6 +7,7 @@ import createjs.easeljs.Ticker;
 import js.Browser;
 import js.html.CanvasElement;
 import js.html.Element;
+import skytroops.defs.LevelDef;
 import skytroops.screens.LevelSelect;
 import skytroops.screens.Loading;
 import skytroops.screens.Menu;
@@ -18,7 +19,7 @@ import skytroops.Sound;
 
 /**
  * ...
- * @author arnaud
+ * @author dagnelies
  */
 class Main
 {
@@ -156,9 +157,9 @@ class Main
 		c.visible = true;
 	}
 	
-	static function onStartMission(level)
+	static function onStartMission( level :LevelDef )
 	{
-		game = new Game(input);
+		game = new Game(input, level);
 		game.onDie = onDie;
 		game.onWin = onWin;
 		game.init();

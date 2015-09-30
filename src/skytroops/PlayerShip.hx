@@ -11,7 +11,7 @@ import skytroops.defs.WeaponDef;
 
 /**
  * ...
- * @author arnaud
+ * @author dagnelies
  */
 class PlayerShip extends Ship
 {

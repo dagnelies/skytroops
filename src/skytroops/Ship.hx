@@ -11,7 +11,7 @@ import skytroops.Bullet;
 
 /**
  * ...
- * @author arnaud
+ * @author dagnelies
  */
 class Ship extends Obj
 {

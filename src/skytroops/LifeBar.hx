@@ -4,7 +4,7 @@ import createjs.easeljs.Shape;
 
 /**
  * ...
- * @author arnaud
+ * @author dagnelies
  */
 class LifeBar extends Container
 {

@@ -4,7 +4,7 @@ import createjs.easeljs.Text;
 
 /**
  * ...
- * @author arnaud
+ * @author dagnelies
  */
 class Label extends Text
 {

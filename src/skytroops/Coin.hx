@@ -5,7 +5,7 @@ import createjs.easeljs.SpriteSheet;
 
 /**
  * ...
- * @author arnaud
+ * @author dagnelies
  */
 class Coin extends Container
 {

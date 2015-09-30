@@ -2,7 +2,7 @@ package skytroops.defs;
 
 /**
  * ...
- * @author arnaud
+ * @author dagnelies
  */
 enum Formation {
 	HORIZONTAL;

@@ -6,19 +6,19 @@ import createjs.easeljs.Container;
 import createjs.easeljs.DisplayObject;
 
 /**
- * @author arnaud
+ * @author dagnelies
  */
 class BackgroundScrolling extends Container
 {
-	public static var img :String = "img/bg/grass.png";
+	//public static var img :String = "img/bg/grass.png";
 			
-	public function new() 
+	public function new(bg_img :String) 
 	{
 		super();
 		
 		for ( i in 0...2 )
 		{
-			var tile = new Bitmap( img );
+			var tile = new Bitmap( bg_img );
 			tile.y = -1525 * i;
 			addChild(tile);
 		}

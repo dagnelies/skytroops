@@ -18,9 +18,14 @@ http://graphicriver.net/item/plane-shooter-game-kit/11220939
 
 You can use the multimedia assets for the development of this project. However, if you want to create your own project or a modified version of it, please purchase the pack separately or provide your own graphic assets.
 
-# TODO
+# How to contribute?
 
-small and big stuff to be done
+There are plenty of ways! If you've no idea where to start, the best is probably to investigate a little and expand this section. ;)
+
+## Misc TODOs
+
+a web page with a chat/shoutbox/irc 
+
 
 * resize chopper imgs to 1.2 / bullet imgs to 1.5
 * level chooser
