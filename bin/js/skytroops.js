@@ -62,7 +62,7 @@ Main.loadResources = function() {
 Main.buildMenu = function() {
 	console.log("Starting...");
 	skytroops_Sound.init();
-	Main.input = new skytroops_InputClassic(Main.stage);
+	if(window.DeviceMotionEvent) Main.input = new skytroops_InputMobile(); else Main.input = new skytroops_InputMouse(Main.stage);
 	Main.levels = new skytroops_screens_LevelSelect();
 	Main.levels.onSelect = Main.onStartMission;
 	Main.menu = new skytroops_screens_Menu();
@@ -93,7 +93,7 @@ Main.goTo = function(c) {
 	c.visible = true;
 };
 Main.onStartMission = function(level) {
-	Main.game = new skytroops_Game(Main.input);
+	Main.game = new skytroops_Game(Main.input,level);
 	Main.game.onDie = Main.onDie;
 	Main.game.onWin = Main.onWin;
 	Main.game.init();
@@ -345,7 +345,7 @@ skytroops_AIShip.prototype = $extend(skytroops_Ship.prototype,{
 			this.angle += this.va * dt;
 			this.vx = Math.cos(this.angle) * this.def.speed;
 			this.vy = Math.sin(this.angle) * this.def.speed;
-			this.vy += skytroops_Game.SPEED / 2;
+			this.vy += skytroops_Game.SPEED;
 		}
 		skytroops_Ship.prototype.update.call(this,dt);
 	}
@@ -353,12 +353,12 @@ skytroops_AIShip.prototype = $extend(skytroops_Ship.prototype,{
 		return 0 < this.x && this.x < skytroops_Game.WIDTH && 0 < this.y && this.y < skytroops_Game.HEIGHT;
 	}
 });
-var skytroops_BackgroundScrolling = function() {
+var skytroops_BackgroundScrolling = function(bg_img) {
 	createjs.Container.call(this);
 	var _g = 0;
 	while(_g < 2) {
 		var i = _g++;
-		var tile = new createjs.Bitmap(skytroops_BackgroundScrolling.img);
+		var tile = new createjs.Bitmap(bg_img);
 		tile.y = -1525 * i;
 		this.addChild(tile);
 	}
@@ -502,11 +502,12 @@ skytroops_DebugLayer.prototype = $extend(createjs.Container.prototype,{
 		this.msg.text = txt;
 	}
 });
-var skytroops_Game = function(input) {
+var skytroops_Game = function(input,level) {
 	this.wave_index = 0;
 	this.seconds = 0;
 	createjs.Container.call(this);
 	this.input = input;
+	this.level = level;
 };
 skytroops_Game.__name__ = true;
 skytroops_Game.__super__ = createjs.Container;
@@ -516,7 +517,7 @@ skytroops_Game.prototype = $extend(createjs.Container.prototype,{
 	}
 	,init: function() {
 		var _g = this;
-		this.bg = new skytroops_BackgroundScrolling();
+		this.bg = new skytroops_BackgroundScrolling(this.level.bg_img);
 		this.addChild(this.bg);
 		this.coins = new createjs.Container();
 		this.addChild(this.coins);
@@ -537,7 +538,7 @@ skytroops_Game.prototype = $extend(createjs.Container.prototype,{
 		this.addChild(this.life_bar);
 		this.debug_layer = new skytroops_DebugLayer();
 		this.addChild(this.debug_layer);
-		this.spawner = new skytroops_waves_Spawner();
+		this.spawner = new skytroops_waves_Spawner(this.level.spawns);
 		this.spawner.onSpawn = $bind(this,this.onSpawn);
 		this.timer = new haxe_Timer(1000);
 		this.timer.run = $bind(this,this.oncePerSecond);
@@ -545,20 +546,13 @@ skytroops_Game.prototype = $extend(createjs.Container.prototype,{
 	}
 	,onSpawn: function(ship) {
 		this.enemies.add(ship);
-		ship.vy += skytroops_Game.SPEED / 2;
+		ship.vy += skytroops_Game.SPEED;
 		ship.onDestroyed = $bind(this,this.onDestroyed);
 	}
 	,oncePerSecond: function() {
 		console.log(this.seconds);
 		this.seconds++;
-		if(this.seconds % 10 == 0) {
-			this.wave_index++;
-			if(this.wave_index == skytroops_Game.WAVES) this.win();
-		}
-		if(this.wave_index < skytroops_Game.WAVES) {
-			var wave = skytroops_levels_Grass.buildWave(this.wave_index);
-			if(wave != null) this.spawner.launch(wave);
-		} else if(this.enemies.size() == 0) this.win();
+		if(this.spawner.isFinished() && this.enemies.size() == 0) this.win();
 	}
 	,onDestroyed: function(o) {
 		var ship = o;
@@ -578,6 +572,7 @@ skytroops_Game.prototype = $extend(createjs.Container.prototype,{
 		this.updateDebugInfo();
 		skytroops_Sound.update(dt);
 		this.bg.update(dt);
+		this.spawner.update(dt);
 		this.enemies.update(dt);
 		var has_shot = false;
 		var $it0 = this.enemies.iterator();
@@ -669,14 +664,60 @@ skytroops_Game.prototype = $extend(createjs.Container.prototype,{
 });
 var skytroops_Input = function() { };
 skytroops_Input.__name__ = true;
-var skytroops_InputClassic = function(stage) {
+var skytroops_InputMobile = function() {
+	this.init = null;
+	this.target = new createjs.Point(skytroops_Game.WIDTH / 2,skytroops_Game.HEIGHT / 2);
+	this.pulled = new createjs.Point(skytroops_Game.WIDTH / 2,skytroops_Game.HEIGHT / 2);
+	window.addEventListener("devicemotion",$bind(this,this.onDeviceMoved));
+};
+skytroops_InputMobile.__name__ = true;
+skytroops_InputMobile.__interfaces__ = [skytroops_Input];
+skytroops_InputMobile.prototype = {
+	onDeviceMoved: function(evt) {
+		if(this.init == null) this.init = evt.accelerationIncludingGravity; else {
+			var now = evt.accelerationIncludingGravity;
+			var dx = now.x - this.init.x;
+			var dy = now.y - this.init.y;
+			var dz = now.z - this.init.z;
+			if(Math.abs(dx) > 1) this.target.x += dx;
+			if(Math.abs(dy) > 1) this.target.y += dy;
+		}
+	}
+	,getMoveTarget: function() {
+		return this.target;
+	}
+	,getShootTarget: function() {
+		return this.pulled;
+	}
+	,update: function(ship,dt) {
+		var trg = this.getMoveTarget();
+		var dy = trg.y - ship.y;
+		var dx = trg.x - ship.x;
+		var dist = Math.sqrt(dx * dx + dy * dy);
+		if(dist == 0) return;
+		var speed = ship.def.speed;
+		if(speed * dt >= dist) {
+			ship.x = trg.x;
+			ship.y = trg.y;
+		} else {
+			ship.x += speed * dt * dx / dist;
+			ship.y += speed * dt * dy / dist;
+		}
+		dx = this.pulled.x - ship.x;
+		dy = this.pulled.y - ship.y;
+		dist = Math.sqrt(dx * dx + dy * dy);
+		this.pulled.x = ship.x + 30 * dx / dist;
+		this.pulled.y = ship.y + 30 * dy / dist;
+	}
+};
+var skytroops_InputMouse = function(stage) {
 	this.target = new createjs.Point(skytroops_Game.WIDTH / 2,skytroops_Game.HEIGHT / 2);
 	this.pulled = new createjs.Point(skytroops_Game.WIDTH / 2,skytroops_Game.HEIGHT / 2);
 	stage.onMouseMove = $bind(this,this.onMouseMove);
 };
-skytroops_InputClassic.__name__ = true;
-skytroops_InputClassic.__interfaces__ = [skytroops_Input];
-skytroops_InputClassic.prototype = {
+skytroops_InputMouse.__name__ = true;
+skytroops_InputMouse.__interfaces__ = [skytroops_Input];
+skytroops_InputMouse.prototype = {
 	onMouseMove: function(e) {
 		this.target.x = e.rawX;
 		this.target.y = e.rawY;
@@ -868,6 +909,9 @@ skytroops_Resources.load = function() {
 	skytroops_Resources.queue.loadFile(skytroops_defs_Ships.TROOPER.image);
 	skytroops_Resources.queue.loadFile(skytroops_defs_Ships.WEAKLING.image);
 	skytroops_Resources.queue.loadFile(skytroops_defs_Ships.FOLLOWER.image);
+	skytroops_Resources.queue.loadFile(skytroops_defs_Ships.MINE.image);
+	skytroops_Resources.queue.loadFile(skytroops_defs_Ships.TANK_LIGHT.image);
+	skytroops_Resources.queue.loadFile(skytroops_defs_Ships.TANK_HEAVY.image);
 	skytroops_Resources.queue.loadFile("img/ships/ufo_grabber.png");
 	skytroops_Resources.queue.loadFile("snd/coin.wav");
 	skytroops_Resources.queue.loadFile("snd/ball.wav");
@@ -996,6 +1040,10 @@ skytroops_defs_Formation.RIGHT.__enum__ = skytroops_defs_Formation;
 skytroops_defs_Formation.RANDOM = ["RANDOM",8];
 skytroops_defs_Formation.RANDOM.toString = $estr;
 skytroops_defs_Formation.RANDOM.__enum__ = skytroops_defs_Formation;
+var skytroops_defs_Weapons = function() { };
+skytroops_defs_Weapons.__name__ = true;
+var skytroops_defs_Ships = function() { };
+skytroops_defs_Ships.__name__ = true;
 var skytroops_defs_Motion = { __ename__ : true, __constructs__ : ["SPREAD","GO_AND_BACK","TURN_LEFT","TURN_RIGHT"] };
 skytroops_defs_Motion.SPREAD = ["SPREAD",0];
 skytroops_defs_Motion.SPREAD.toString = $estr;
@@ -1009,12 +1057,25 @@ skytroops_defs_Motion.TURN_LEFT.__enum__ = skytroops_defs_Motion;
 skytroops_defs_Motion.TURN_RIGHT = ["TURN_RIGHT",3];
 skytroops_defs_Motion.TURN_RIGHT.toString = $estr;
 skytroops_defs_Motion.TURN_RIGHT.__enum__ = skytroops_defs_Motion;
-var skytroops_defs_Weapons = function() { };
-skytroops_defs_Weapons.__name__ = true;
-var skytroops_defs_Ships = function() { };
-skytroops_defs_Ships.__name__ = true;
 var skytroops_defs_Waves = function() { };
 skytroops_defs_Waves.__name__ = true;
+var skytroops_defs_Levels = function() { };
+skytroops_defs_Levels.__name__ = true;
+skytroops_defs_Levels.buildDesertLevel = function(n,diff) {
+	return skytroops_defs_Levels.buildCustomLevel(skytroops_defs_Levels.BG_DESERT,skytroops_defs_Levels.WAVES_GRASS[n],diff,60);
+};
+skytroops_defs_Levels.buildCustomLevel = function(bg_img,waves,diff,duration) {
+	var t = 3.0;
+	var level = { bg_img : bg_img, spawns : []};
+	while(t < duration) {
+		var i = Std.random(waves.length);
+		var w = waves[i];
+		level.spawns.push({ t : t, wave : w});
+		var dt = w.n * w.ship.xp / diff;
+		t += dt;
+	}
+	return level;
+};
 var skytroops_gui_Button = function(label) {
 	this.h = 89;
 	this.w = 247;
@@ -1062,43 +1123,63 @@ var skytroops_levels_Grass = function() {
 };
 skytroops_levels_Grass.__name__ = true;
 skytroops_levels_Grass.buildWave = function(difficulty) {
-	skytroops_levels_Grass.cooldown += difficulty + 1;
-	var i = Std.random(skytroops_levels_Grass.WAVES.length);
-	var w = skytroops_levels_Grass.WAVES[i];
-	var xp = w.n * w.ship.xp;
-	console.log("diff: " + xp + " vs " + difficulty);
-	if(xp * 5 > skytroops_levels_Grass.cooldown) return null;
-	skytroops_levels_Grass.cooldown -= xp * 5;
-	return w;
+	skytroops_levels_Grass.cooldown += difficulty + 15;
+	while(true) {
+		var i = Std.random(skytroops_levels_Grass.WAVES.length);
+		var w = skytroops_levels_Grass.WAVES[i];
+		var xp = w.n * w.ship.xp * 3;
+		if(xp <= skytroops_levels_Grass.cooldown) {
+			skytroops_levels_Grass.cooldown -= xp;
+			return w;
+		}
+		if(Std.random(10) == 0) return null;
+	}
+};
+skytroops_levels_Grass.buildLevel = function(diff) {
+	return skytroops_levels_Grass.buildCustomLevel(skytroops_levels_Grass.WAVES,diff,60);
+};
+skytroops_levels_Grass.buildCustomLevel = function(waves,diff,duration) {
+	var t = 3.0;
+	var level = { bg_img : skytroops_levels_Grass.BG, spawns : []};
+	while(t < duration) {
+		var i = Std.random(waves.length);
+		var w = waves[i];
+		level.spawns.push({ t : t, wave : w});
+		var dt = w.n * w.ship.xp / diff;
+		t += dt;
+	}
+	return level;
 };
 skytroops_levels_Grass.__super__ = skytroops_levels_Level;
 skytroops_levels_Grass.prototype = $extend(skytroops_levels_Level.prototype,{
 });
 var skytroops_screens_LevelSelect = function() {
+	var _g2 = this;
 	createjs.Container.call(this);
-	var bg = new createjs.Bitmap("img/gui/splash.png");
-	this.addChild(bg);
-	this.addButton("grass",350);
-	this.addButton("rocky",450);
-	this.addButton("snow",550);
-	this.addButton("desert",650);
-	this.addButton("islands",750);
+	var bmp = new createjs.Bitmap("img/bg/map.png");
+	this.addChild(bmp);
+	var _g = 0;
+	var _g1 = skytroops_screens_LevelSelect.DOTS;
+	while(_g < _g1.length) {
+		var d = [_g1[_g]];
+		++_g;
+		var icon = new createjs.Bitmap("img/gui/dot_empty.png");
+		icon.x = d[0].x - icon.image.width / 2;
+		icon.y = d[0].y - icon.image.height / 2;
+		icon.onClick = (function(d) {
+			return function() {
+				var lvl = d[0].level();
+				_g2.onSelect(lvl);
+			};
+		})(d);
+		this.addChild(icon);
+	}
 };
 skytroops_screens_LevelSelect.__name__ = true;
 skytroops_screens_LevelSelect.__super__ = createjs.Container;
 skytroops_screens_LevelSelect.prototype = $extend(createjs.Container.prototype,{
-	addButton: function(level,y) {
-		var _g = this;
-		var btn = new skytroops_gui_Button(level);
-		btn.x = skytroops_Game.WIDTH / 2;
-		btn.y = y;
-		btn.onBtnClicked = function() {
-			_g.onSelect(level);
-		};
-		this.addChild(btn);
-	}
-	,onSelect: function(level) {
-		console.log("Level selected: " + level);
+	onSelect: function(level) {
+		console.log("Level selected");
 	}
 });
 var skytroops_screens_Loading = function() {
@@ -1138,6 +1219,13 @@ var skytroops_screens_Menu = function() {
 		_g.onPlay();
 	};
 	this.addChild(easy);
+	var github = new createjs.Bitmap("img/github.png");
+	github.x = skytroops_Game.WIDTH - 20 - 64;
+	github.y = 20;
+	github.onClick = function() {
+		window.open("https://github.com/dagnelies/skytroops","_blank");
+	};
+	this.addChild(github);
 };
 skytroops_screens_Menu.__name__ = true;
 skytroops_screens_Menu.__super__ = createjs.Container;
@@ -1146,11 +1234,24 @@ skytroops_screens_Menu.prototype = $extend(createjs.Container.prototype,{
 		console.log("Play! clicked");
 	}
 });
-var skytroops_waves_Spawner = function() {
+var skytroops_waves_Spawner = function(spawns) {
+	this.spawns_index = 0;
+	this.t = 0.0;
+	this.spawns = spawns;
 };
 skytroops_waves_Spawner.__name__ = true;
 skytroops_waves_Spawner.prototype = {
-	getRadius: function(image) {
+	update: function(dt) {
+		this.t += dt;
+		while(!this.isFinished() && this.t > this.spawns[this.spawns_index].t) {
+			this.launch(this.spawns[this.spawns_index].wave);
+			this.spawns_index++;
+		}
+	}
+	,isFinished: function() {
+		return this.spawns_index >= this.spawns.length;
+	}
+	,getRadius: function(image) {
 		var img = skytroops_Resources.get(image);
 		return (img.width + img.height) / 2;
 	}
@@ -1287,8 +1388,8 @@ skytroops_waves_Spawner.prototype = {
 				p.y = i * r;
 				break;
 			case 8:
-				p.x = Math.random() * 500;
-				p.y = Math.random() * 500;
+				p.x = Math.random() * (skytroops_Game.WIDTH - 2 * r);
+				p.y = Math.random() * (skytroops_Game.WIDTH - 2 * r);
 				break;
 			}
 		}
@@ -1358,7 +1459,6 @@ var $_, $fid = 0;
 function $bind(o,m) { if( m == null ) return null; if( m.__id__ == null ) m.__id__ = $fid++; var f; if( o.hx__closures__ == null ) o.hx__closures__ = {}; else f = o.hx__closures__[m.__id__]; if( f == null ) { f = function(){ return f.method.apply(f.scope, arguments); }; f.scope = o; f.method = m; o.hx__closures__[m.__id__] = f; } return f; }
 String.__name__ = true;
 Array.__name__ = true;
-skytroops_BackgroundScrolling.img = "img/bg/grass.png";
 skytroops_Game.SPEED = 50.0;
 skytroops_Game.WIDTH = 640;
 skytroops_Game.HEIGHT = 960;
@@ -1385,17 +1485,46 @@ skytroops_defs_Ships.TROOPER = { image : "img/ships/trooper.png", shadow : null,
 skytroops_defs_Ships.GUNNER = { image : "img/ships/gunner.png", shadow : null, speed : 100, armor : 2, xp : 4, weapon : skytroops_defs_Weapons.MACHINE_GUN};
 skytroops_defs_Ships.SNIPER = { image : "img/ships/sniper.png", shadow : null, speed : 100, armor : 2, xp : 6, weapon : skytroops_defs_Weapons.AIMED_GUN};
 skytroops_defs_Ships.FOLLOWER = { image : "img/ships/uplane.png", shadow : null, speed : 100, armor : 1, xp : 1, weapon : null};
+skytroops_defs_Ships.MINE = { image : "img/ships/mine.png", shadow : null, speed : 0, armor : 10, xp : 1, weapon : null};
+skytroops_defs_Ships.TANK_LIGHT = { image : "img/ships/tank_1.png", shadow : null, speed : 0, armor : 3, xp : 2, weapon : skytroops_defs_Weapons.MACHINE_GUN};
+skytroops_defs_Ships.TANK_HEAVY = { image : "img/ships/tank_2.png", shadow : null, speed : 0, armor : 5, xp : 3, weapon : skytroops_defs_Weapons.MISSILE_LAUNCHER};
 skytroops_defs_Waves.WEAKLING_I = { n : 1, ship : skytroops_defs_Ships.WEAKLING, formation : skytroops_defs_Formation.DOWN, from : skytroops_defs_Direction.TOP};
 skytroops_defs_Waves.WEAKLING_II = { n : 3, ship : skytroops_defs_Ships.WEAKLING, formation : skytroops_defs_Formation.DOWN, from : skytroops_defs_Direction.TOP};
 skytroops_defs_Waves.WEAKLING_III = { n : 5, ship : skytroops_defs_Ships.WEAKLING, formation : skytroops_defs_Formation.DOWN, from : skytroops_defs_Direction.TOP};
 skytroops_defs_Waves.WEAKLING_TL_I = { n : 2, ship : skytroops_defs_Ships.WEAKLING, formation : skytroops_defs_Formation.SLASH, from : skytroops_defs_Direction.TOP_LEFT};
-skytroops_defs_Waves.WEAKLING_TR_I = { n : 4, ship : skytroops_defs_Ships.WEAKLING, formation : skytroops_defs_Formation.BSLASH, from : skytroops_defs_Direction.TOP_RIGHT};
+skytroops_defs_Waves.WEAKLING_TR_I = { n : 2, ship : skytroops_defs_Ships.WEAKLING, formation : skytroops_defs_Formation.BSLASH, from : skytroops_defs_Direction.TOP_RIGHT};
 skytroops_defs_Waves.WEAKLING_TL_II = { n : 4, ship : skytroops_defs_Ships.WEAKLING, formation : skytroops_defs_Formation.SLASH, from : skytroops_defs_Direction.TOP_LEFT};
 skytroops_defs_Waves.WEAKLING_TR_II = { n : 4, ship : skytroops_defs_Ships.WEAKLING, formation : skytroops_defs_Formation.BSLASH, from : skytroops_defs_Direction.TOP_RIGHT};
 skytroops_defs_Waves.UPLANE_I = { n : 1, ship : skytroops_defs_Ships.FOLLOWER, formation : skytroops_defs_Formation.HORIZONTAL, from : skytroops_defs_Direction.BOTTOM};
 skytroops_defs_Waves.UPLANE_II = { n : 3, ship : skytroops_defs_Ships.FOLLOWER, formation : skytroops_defs_Formation.RANDOM, from : skytroops_defs_Direction.BOTTOM};
 skytroops_defs_Waves.UPLANE_III = { n : 5, ship : skytroops_defs_Ships.FOLLOWER, formation : skytroops_defs_Formation.RANDOM, from : skytroops_defs_Direction.BOTTOM};
+skytroops_defs_Waves.SHOOTER_I = { n : 1, ship : skytroops_defs_Ships.GUNNER, formation : skytroops_defs_Formation.HORIZONTAL, from : skytroops_defs_Direction.TOP};
+skytroops_defs_Waves.SHOOTER_II = { n : 2, ship : skytroops_defs_Ships.GUNNER, formation : skytroops_defs_Formation.HORIZONTAL, from : skytroops_defs_Direction.TOP, motion : skytroops_defs_Motion.SPREAD};
+skytroops_defs_Waves.SHOOTER_III = { n : 3, ship : skytroops_defs_Ships.GUNNER, formation : skytroops_defs_Formation.DOWN, from : skytroops_defs_Direction.TOP, motion : skytroops_defs_Motion.SPREAD};
+skytroops_defs_Waves.MINES = { n : 4, ship : skytroops_defs_Ships.MINE, formation : skytroops_defs_Formation.HORIZONTAL, from : skytroops_defs_Direction.TOP};
+skytroops_defs_Waves.TANK_L_I = { n : 1, ship : skytroops_defs_Ships.TANK_LIGHT, formation : skytroops_defs_Formation.HORIZONTAL, from : skytroops_defs_Direction.TOP};
+skytroops_defs_Waves.TANK_H_I = { n : 1, ship : skytroops_defs_Ships.TANK_HEAVY, formation : skytroops_defs_Formation.HORIZONTAL, from : skytroops_defs_Direction.TOP};
+skytroops_defs_Levels.BG_GRASS = "img/bg/grass.png";
+skytroops_defs_Levels.BG_ROCKY = "img/bg/rocky.png";
+skytroops_defs_Levels.BG_SNOW = "img/bg/snow.png";
+skytroops_defs_Levels.BG_DESERT = "img/bg/desert.png";
+skytroops_defs_Levels.BG_ISLANDS = "img/bg/islands.png";
+skytroops_defs_Levels.WAVES_GRASS = [[skytroops_defs_Waves.WEAKLING_I,skytroops_defs_Waves.WEAKLING_TL_I,skytroops_defs_Waves.WEAKLING_TR_I,skytroops_defs_Waves.UPLANE_I],[skytroops_defs_Waves.WEAKLING_II,skytroops_defs_Waves.WEAKLING_TL_II,skytroops_defs_Waves.WEAKLING_TR_II,skytroops_defs_Waves.UPLANE_II],[skytroops_defs_Waves.SHOOTER_I,skytroops_defs_Waves.WEAKLING_TL_I,skytroops_defs_Waves.WEAKLING_TR_I,skytroops_defs_Waves.UPLANE_I]];
+skytroops_defs_Levels.WAVES_ROCKY = [];
+skytroops_defs_Levels.WAVES_SNOW = [];
+skytroops_defs_Levels.WAVES_DESERT = [];
+skytroops_defs_Levels.WAVES_ISLANDS = [];
 skytroops_levels_Grass.cooldown = 0;
-skytroops_levels_Grass.WAVES = [skytroops_defs_Waves.UPLANE_I,skytroops_defs_Waves.UPLANE_II,skytroops_defs_Waves.UPLANE_III,skytroops_defs_Waves.WEAKLING_I,skytroops_defs_Waves.WEAKLING_II,skytroops_defs_Waves.WEAKLING_III,skytroops_defs_Waves.WEAKLING_TL_I,skytroops_defs_Waves.WEAKLING_TL_II,skytroops_defs_Waves.WEAKLING_TR_I,skytroops_defs_Waves.WEAKLING_TR_II];
+skytroops_levels_Grass.WAVES = [skytroops_defs_Waves.MINES,skytroops_defs_Waves.TANK_L_I,skytroops_defs_Waves.TANK_H_I];
+skytroops_levels_Grass.BG = "img/bg/grass.png";
+skytroops_screens_LevelSelect.DOTS = [{ x : 340, y : 176, level : function() {
+	return skytroops_defs_Levels.buildDesertLevel(0,1);
+}},{ x : 259, y : 310, level : function() {
+	return skytroops_defs_Levels.buildDesertLevel(1,1.5);
+}},{ x : 346, y : 410, level : function() {
+	return skytroops_defs_Levels.buildDesertLevel(2,2);
+}},{ x : 492, y : 471, level : function() {
+	return skytroops_defs_Levels.buildDesertLevel(2,5);
+}}];
 Main.main();
 })(typeof console != "undefined" ? console : {log:function(){}});
