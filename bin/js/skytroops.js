@@ -62,7 +62,7 @@ Main.loadResources = function() {
 Main.buildMenu = function() {
 	console.log("Starting...");
 	skytroops_Sound.init();
-	Main.input = new skytroops_InputMouse(Main.stage);
+	if(window.DeviceMotionEvent) Main.input = new skytroops_InputMobile(); else Main.input = new skytroops_InputMouse(Main.stage);
 	Main.levels = new skytroops_screens_LevelSelect();
 	Main.levels.onSelect = Main.onStartMission;
 	Main.menu = new skytroops_screens_Menu();
@@ -760,14 +760,8 @@ skytroops_InputMobile.__name__ = true;
 skytroops_InputMobile.__interfaces__ = [skytroops_Input];
 skytroops_InputMobile.prototype = {
 	onDeviceMoved: function(evt) {
-		if(this.init == null) this.init = evt.accelerationIncludingGravity; else {
-			var now = evt.accelerationIncludingGravity;
-			var dx = now.x - this.init.x;
-			var dy = now.y - this.init.y;
-			var dz = now.z - this.init.z;
-			if(Math.abs(dx) > 1) this.target.x += dx;
-			if(Math.abs(dy) > 1) this.target.y += dy;
-		}
+		if(this.init == null) this.init = evt.accelerationIncludingGravity;
+		this.now = evt.accelerationIncludingGravity;
 	}
 	,getMoveDir: function() {
 		return this.target;
@@ -779,19 +773,16 @@ skytroops_InputMobile.prototype = {
 		return this.pulled;
 	}
 	,update: function(ship,dt) {
-		var trg = this.getShootTarget();
-		var dy = trg.y - ship.y;
-		var dx = trg.x - ship.x;
+		var dx = this.now.x - this.init.x;
+		var dy = this.now.y - this.init.y;
+		var dz = this.now.z - this.init.z;
 		var dist = Math.sqrt(dx * dx + dy * dy);
-		if(dist == 0) return;
-		var speed = ship.def.speed;
-		if(speed * dt >= dist) {
-			ship.x = trg.x;
-			ship.y = trg.y;
-		} else {
-			ship.x += speed * dt * dx / dist;
-			ship.y += speed * dt * dy / dist;
-		}
+		var thrust = dist / 3;
+		if(thrust < 0.1) return;
+		if(thrust > 1) thrust = 1;
+		var speed = ship.def.speed * thrust;
+		ship.x += speed * dt * dx / dist;
+		ship.y += speed * dt * dy / dist;
 		dx = this.pulled.x - ship.x;
 		dy = this.pulled.y - ship.y;
 		dist = Math.sqrt(dx * dx + dy * dy);
