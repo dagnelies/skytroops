@@ -62,7 +62,7 @@ Main.loadResources = function() {
 Main.buildMenu = function() {
 	console.log("Starting...");
 	skytroops_Sound.init();
-	if(window.DeviceMotionEvent) Main.input = new skytroops_InputMobile(); else Main.input = new skytroops_InputMouse(Main.stage);
+	Main.input = new skytroops_InputMouse(Main.stage);
 	Main.levels = new skytroops_screens_LevelSelect();
 	Main.levels.onSelect = Main.onStartMission;
 	Main.menu = new skytroops_screens_Menu();
@@ -664,6 +664,92 @@ skytroops_Game.prototype = $extend(createjs.Container.prototype,{
 });
 var skytroops_Input = function() { };
 skytroops_Input.__name__ = true;
+var skytroops_InputDesktop = function(stage) {
+	this.shoot_target = new createjs.Point();
+	this.move_dir = new createjs.Point();
+	this.right = false;
+	this.down = false;
+	this.left = false;
+	this.up = false;
+	stage.onMouseMove = $bind(this,this.onMouseMove);
+	window.document.onkeydown = $bind(this,this.onKeyDown);
+	window.document.onkeyup = $bind(this,this.onKeyUp);
+};
+skytroops_InputDesktop.__name__ = true;
+skytroops_InputDesktop.__interfaces__ = [skytroops_Input];
+skytroops_InputDesktop.prototype = {
+	onKeyDown: function(e) {
+		var _g = e.keyCode;
+		switch(_g) {
+		case 37:case 65:
+			this.left = true;
+			break;
+		case 38:case 87:
+			this.up = true;
+			break;
+		case 39:case 68:
+			this.right = true;
+			break;
+		case 40:case 83:
+			this.down = true;
+			break;
+		}
+		this.updateDir();
+	}
+	,onKeyUp: function(e) {
+		var _g = e.keyCode;
+		switch(_g) {
+		case 37:case 65:
+			this.left = false;
+			break;
+		case 38:case 87:
+			this.up = false;
+			break;
+		case 39:case 68:
+			this.right = false;
+			break;
+		case 40:case 83:
+			this.down = false;
+			break;
+		}
+		this.updateDir();
+	}
+	,updateDir: function() {
+		this.move_dir.x = 0;
+		this.move_dir.y = 0;
+		if(this.left) this.move_dir.x -= 1;
+		if(this.up) this.move_dir.y -= 1;
+		if(this.right) this.move_dir.x += 1;
+		if(this.down) this.move_dir.y += 1;
+		if(this.move_dir.x != 0 && this.move_dir.y != 0) {
+			var dist = Math.sqrt(this.move_dir.x * this.move_dir.x + this.move_dir.y * this.move_dir.y);
+			this.move_dir.x /= dist;
+			this.move_dir.y /= dist;
+		}
+	}
+	,onMouseMove: function(e) {
+		this.shoot_target.x = e.rawX;
+		this.shoot_target.y = e.rawY;
+	}
+	,getMoveDir: function() {
+		return this.move_dir;
+	}
+	,getMoveTarget: function() {
+		return null;
+	}
+	,getShootTarget: function() {
+		return this.shoot_target;
+	}
+	,update: function(ship,dt) {
+		var dir = this.getMoveDir();
+		var trg = this.getShootTarget();
+		ship.vx = dir.x * ship.def.speed;
+		ship.vy = dir.y * ship.def.speed;
+		var dy = trg.y - ship.y;
+		var dx = trg.x - ship.x;
+		var dist = Math.sqrt(dx * dx + dy * dy);
+	}
+};
 var skytroops_InputMobile = function() {
 	this.init = null;
 	this.target = new createjs.Point(skytroops_Game.WIDTH / 2,skytroops_Game.HEIGHT / 2);
@@ -683,14 +769,17 @@ skytroops_InputMobile.prototype = {
 			if(Math.abs(dy) > 1) this.target.y += dy;
 		}
 	}
-	,getMoveTarget: function() {
+	,getMoveDir: function() {
 		return this.target;
+	}
+	,getMoveTarget: function() {
+		return null;
 	}
 	,getShootTarget: function() {
 		return this.pulled;
 	}
 	,update: function(ship,dt) {
-		var trg = this.getMoveTarget();
+		var trg = this.getShootTarget();
 		var dy = trg.y - ship.y;
 		var dx = trg.x - ship.x;
 		var dist = Math.sqrt(dx * dx + dy * dy);
@@ -721,6 +810,9 @@ skytroops_InputMouse.prototype = {
 	onMouseMove: function(e) {
 		this.target.x = e.rawX;
 		this.target.y = e.rawY;
+	}
+	,getMoveDir: function() {
+		return null;
 	}
 	,getMoveTarget: function() {
 		return this.target;
@@ -1061,8 +1153,8 @@ var skytroops_defs_Waves = function() { };
 skytroops_defs_Waves.__name__ = true;
 var skytroops_defs_Levels = function() { };
 skytroops_defs_Levels.__name__ = true;
-skytroops_defs_Levels.buildDesertLevel = function(n,diff) {
-	return skytroops_defs_Levels.buildCustomLevel(skytroops_defs_Levels.BG_DESERT,skytroops_defs_Levels.WAVES_GRASS[n],diff,60);
+skytroops_defs_Levels.buildGrassLevel = function(n,diff) {
+	return skytroops_defs_Levels.buildCustomLevel(skytroops_defs_Levels.BG_GRASS,skytroops_defs_Levels.WAVES_GRASS[n],diff,60);
 };
 skytroops_defs_Levels.buildCustomLevel = function(bg_img,waves,diff,duration) {
 	var t = 3.0;
@@ -1462,7 +1554,6 @@ Array.__name__ = true;
 skytroops_Game.SPEED = 50.0;
 skytroops_Game.WIDTH = 640;
 skytroops_Game.HEIGHT = 960;
-skytroops_Game.WAVES = 20;
 skytroops_Game.TRACTOR = 100;
 skytroops_defs_Bullets.BULLET = { image : "img/bullets/bullet.png", sound : "snd/ball.wav", damage : 1, speed : 500};
 skytroops_defs_Bullets.BALL = { image : "img/bullets/ball.png", sound : "snd/ball.wav", damage : 2, speed : 400};
@@ -1518,13 +1609,13 @@ skytroops_levels_Grass.cooldown = 0;
 skytroops_levels_Grass.WAVES = [skytroops_defs_Waves.MINES,skytroops_defs_Waves.TANK_L_I,skytroops_defs_Waves.TANK_H_I];
 skytroops_levels_Grass.BG = "img/bg/grass.png";
 skytroops_screens_LevelSelect.DOTS = [{ x : 340, y : 176, level : function() {
-	return skytroops_defs_Levels.buildDesertLevel(0,1);
+	return skytroops_defs_Levels.buildGrassLevel(0,1);
 }},{ x : 259, y : 310, level : function() {
-	return skytroops_defs_Levels.buildDesertLevel(1,1.5);
+	return skytroops_defs_Levels.buildGrassLevel(1,1.5);
 }},{ x : 346, y : 410, level : function() {
-	return skytroops_defs_Levels.buildDesertLevel(2,2);
+	return skytroops_defs_Levels.buildGrassLevel(2,2);
 }},{ x : 492, y : 471, level : function() {
-	return skytroops_defs_Levels.buildDesertLevel(2,5);
+	return skytroops_defs_Levels.buildGrassLevel(2,5);
 }}];
 Main.main();
 })(typeof console != "undefined" ? console : {log:function(){}});
