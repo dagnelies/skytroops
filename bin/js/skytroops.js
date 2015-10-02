@@ -773,9 +773,8 @@ skytroops_InputMobile.prototype = {
 		return this.pulled;
 	}
 	,update: function(ship,dt) {
-		var dx = this.now.x - this.init.x;
+		var dx = -(this.now.x - this.init.x);
 		var dy = this.now.y - this.init.y;
-		var dz = this.now.z - this.init.z;
 		var dist = Math.sqrt(dx * dx + dy * dy);
 		var thrust = dist / 3;
 		if(thrust < 0.1) return;
