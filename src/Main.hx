@@ -8,11 +8,12 @@ import js.Browser;
 import js.html.CanvasElement;
 import js.html.Element;
 import skytroops.defs.LevelDef;
+import skytroops.InputMobile;
 import skytroops.screens.LevelSelect;
 import skytroops.screens.Loading;
 import skytroops.screens.Menu;
 import skytroops.Input;
-import skytroops.InputClassic;
+import skytroops.InputMouse;
 import skytroops.Game;
 import skytroops.Resources;
 import skytroops.Sound;
@@ -106,7 +107,15 @@ class Main
 		
 		Sound.init();
 		
-		input = new InputClassic(stage);
+		untyped
+		{
+			if( Browser.window.DeviceMotionEvent ) {
+				input = new InputMobile();
+			}
+			else {
+				input = new InputMouse(stage);
+			}
+		}
 		levels = new LevelSelect();
 		levels.onSelect = onStartMission;
 		menu = new Menu();

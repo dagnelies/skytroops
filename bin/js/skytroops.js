@@ -62,7 +62,7 @@ Main.loadResources = function() {
 Main.buildMenu = function() {
 	console.log("Starting...");
 	skytroops_Sound.init();
-	Main.input = new skytroops_InputClassic(Main.stage);
+	if(window.DeviceMotionEvent) Main.input = new skytroops_InputMobile(); else Main.input = new skytroops_InputMouse(Main.stage);
 	Main.levels = new skytroops_screens_LevelSelect();
 	Main.levels.onSelect = Main.onStartMission;
 	Main.menu = new skytroops_screens_Menu();
@@ -664,14 +664,60 @@ skytroops_Game.prototype = $extend(createjs.Container.prototype,{
 });
 var skytroops_Input = function() { };
 skytroops_Input.__name__ = true;
-var skytroops_InputClassic = function(stage) {
+var skytroops_InputMobile = function() {
+	this.init = null;
+	this.target = new createjs.Point(skytroops_Game.WIDTH / 2,skytroops_Game.HEIGHT / 2);
+	this.pulled = new createjs.Point(skytroops_Game.WIDTH / 2,skytroops_Game.HEIGHT / 2);
+	window.addEventListener("devicemotion",$bind(this,this.onDeviceMoved));
+};
+skytroops_InputMobile.__name__ = true;
+skytroops_InputMobile.__interfaces__ = [skytroops_Input];
+skytroops_InputMobile.prototype = {
+	onDeviceMoved: function(evt) {
+		if(this.init == null) this.init = evt.accelerationIncludingGravity; else {
+			var now = evt.accelerationIncludingGravity;
+			var dx = now.x - this.init.x;
+			var dy = now.y - this.init.y;
+			var dz = now.z - this.init.z;
+			if(Math.abs(dx) > 1) this.target.x += dx;
+			if(Math.abs(dy) > 1) this.target.y += dy;
+		}
+	}
+	,getMoveTarget: function() {
+		return this.target;
+	}
+	,getShootTarget: function() {
+		return this.pulled;
+	}
+	,update: function(ship,dt) {
+		var trg = this.getMoveTarget();
+		var dy = trg.y - ship.y;
+		var dx = trg.x - ship.x;
+		var dist = Math.sqrt(dx * dx + dy * dy);
+		if(dist == 0) return;
+		var speed = ship.def.speed;
+		if(speed * dt >= dist) {
+			ship.x = trg.x;
+			ship.y = trg.y;
+		} else {
+			ship.x += speed * dt * dx / dist;
+			ship.y += speed * dt * dy / dist;
+		}
+		dx = this.pulled.x - ship.x;
+		dy = this.pulled.y - ship.y;
+		dist = Math.sqrt(dx * dx + dy * dy);
+		this.pulled.x = ship.x + 30 * dx / dist;
+		this.pulled.y = ship.y + 30 * dy / dist;
+	}
+};
+var skytroops_InputMouse = function(stage) {
 	this.target = new createjs.Point(skytroops_Game.WIDTH / 2,skytroops_Game.HEIGHT / 2);
 	this.pulled = new createjs.Point(skytroops_Game.WIDTH / 2,skytroops_Game.HEIGHT / 2);
 	stage.onMouseMove = $bind(this,this.onMouseMove);
 };
-skytroops_InputClassic.__name__ = true;
-skytroops_InputClassic.__interfaces__ = [skytroops_Input];
-skytroops_InputClassic.prototype = {
+skytroops_InputMouse.__name__ = true;
+skytroops_InputMouse.__interfaces__ = [skytroops_Input];
+skytroops_InputMouse.prototype = {
 	onMouseMove: function(e) {
 		this.target.x = e.rawX;
 		this.target.y = e.rawY;
@@ -1414,8 +1460,8 @@ function $bind(o,m) { if( m == null ) return null; if( m.__id__ == null ) m.__id
 String.__name__ = true;
 Array.__name__ = true;
 skytroops_Game.SPEED = 50.0;
-skytroops_Game.WIDTH = 640;
-skytroops_Game.HEIGHT = 960;
+skytroops_Game.WIDTH = 480;
+skytroops_Game.HEIGHT = 800;
 skytroops_Game.WAVES = 20;
 skytroops_Game.TRACTOR = 100;
 skytroops_defs_Bullets.BULLET = { image : "img/bullets/bullet.png", sound : "snd/ball.wav", damage : 1, speed : 500};

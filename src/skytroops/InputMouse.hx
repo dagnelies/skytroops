@@ -5,7 +5,7 @@ import js.Browser;
 
 
 
-class InputClassic implements Input
+class InputMouse implements Input
 {
 	var pulled = new Point(Game.WIDTH / 2, Game.HEIGHT / 2); // the anchor pulled behind
 	var target = new Point(Game.WIDTH / 2, Game.HEIGHT / 2); // the end position target
@@ -63,7 +63,5 @@ class InputClassic implements Input
 		dist = Math.sqrt( dx * dx + dy * dy );
 		pulled.x = ship.x + 30 * dx / dist;
 		pulled.y = ship.y + 30 * dy / dist;
-		
-		
 	}
 }
