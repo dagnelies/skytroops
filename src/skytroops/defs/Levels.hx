@@ -23,14 +23,14 @@ class Levels
 	static var WAVES_ISLANDS = [];
 
 	
-	public static function buildDesertLevel(n: Int, diff :Float)
+	public static function buildGrassLevel(n: Int, diff :Float)
 	{
-		return buildCustomLevel(BG_DESERT, WAVES_GRASS[n], diff, 60);
+		return buildCustomLevel(BG_GRASS, WAVES_GRASS[n], diff, 60);
 	}
 	
 	static function buildCustomLevel(bg_img :String, waves :Array<WaveDef>, diff :Float, duration :Float) :LevelDef
 	{
-		var t = 3.0;
+		var t = 1.0; // nothing happens the first second
 		var level :LevelDef = {
 			bg_img: bg_img,
 			spawns: []

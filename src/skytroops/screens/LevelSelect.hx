@@ -19,22 +19,22 @@ class LevelSelect extends Container
 		{
 			x: 340,
 			y: 176,
-			level: function() { return Levels.buildDesertLevel(0, 1); }
+			level: function() { return Levels.buildGrassLevel(0, 1); }
 		},
 		{
 			x: 259,
 			y: 310,
-			level: function() { return Levels.buildDesertLevel(1, 1.5); }
+			level: function() { return Levels.buildGrassLevel(1, 1.5); }
 		},
 		{
 			x: 346,
 			y: 410,
-			level: function() { return Levels.buildDesertLevel(2, 2); }
+			level: function() { return Levels.buildGrassLevel(2, 2); }
 		},
 		{
 			x: 492,
 			y: 471,
-			level: function() { return Levels.buildDesertLevel(2, 5); }
+			level: function() { return Levels.buildGrassLevel(2, 5); }
 		}
 	];
 	

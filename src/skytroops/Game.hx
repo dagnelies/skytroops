@@ -25,15 +25,14 @@ class Game extends Container
 	public static var WIDTH = 1080;
 	public static var HEIGHT = 1920;	
 	*/
-	
+	/*
 	public static var WIDTH = 480;
 	public static var HEIGHT = 800;
+	*/
 	
-	/*
 	public static var WIDTH = 640;
 	public static var HEIGHT = 960;	
-	*/
-	public static var WAVES = 20;
+	
 	public static var TRACTOR = 100;
 	/*
 	public static var WIDTH = 480;

@@ -8,10 +8,8 @@ import js.Browser;
  */
 class InputMobile implements Input
 {
-	var pulled = new Point(Game.WIDTH / 2, Game.HEIGHT / 2); // the anchor pulled behind
-	var target = new Point(Game.WIDTH / 2, Game.HEIGHT / 2); // the end position target
-	
 	var init = null; // the initial orientation
+	var now :Dynamic;
 	
 	public function new() 
 	{
@@ -25,57 +23,44 @@ class InputMobile implements Input
 		if ( init == null ) {
 			init = evt.accelerationIncludingGravity;
 		}
-		else {
-			var now = evt.accelerationIncludingGravity;
-			var dx = now.x - init.x;
-			var dy = now.y - init.y;
-			var dz = now.z - init.z;
-			if( Math.abs(dx) > 1 )
-				target.x += dx;
-			if( Math.abs(dy) > 1 )
-				target.y += dy;
-		}
+		now = evt.accelerationIncludingGravity;
 	}
 	
-	
-	public function getMoveTarget() :Point
-	{
-		return target;
-	}
 	
 	public function getShootTarget() :Point
 	{
-		return pulled;
+		return null;
 	}
 	
 	public function update(ship :PlayerShip, dt :Float) :Void
 	{
-		var trg = getMoveTarget();
-		var dy = trg.y - ship.y;
-		var dx = trg.x - ship.x;
-		var dist = Math.sqrt( dx * dx + dy * dy );
-		
-		if ( dist == 0 )
+		if ( now == null )
 			return;
 			
-		var speed = ship.def.speed;
+		var dx = -(now.x - init.x);
+		var dy = now.y - init.y;
+		// var dz = now.z - init.z;
 		
-		if ( speed * dt >= dist )
-		{
-			ship.x = trg.x;
-			ship.y = trg.y;
-		}
-		else
-		{
-			ship.x += speed * dt * dx / dist;
-			ship.y += speed * dt * dy / dist;
-		}
+		var dist = Math.sqrt(dx * dx + dy * dy);
 		
+		var thrust = dist / 3;
+		if (thrust < 0.1)
+			return;
+		if ( thrust > 1 )
+			thrust = 1;
+			
+		var speed = ship.def.speed *  thrust;
+		
+		ship.x += speed * dt * dx / dist;
+		ship.y += speed * dt * dy / dist;
+		
+		/*
 		dx = pulled.x - ship.x;
 		dy = pulled.y - ship.y;
 		
 		dist = Math.sqrt( dx * dx + dy * dy );
 		pulled.x = ship.x + 30 * dx / dist;
-		pulled.y = ship.y + 30 * dy / dist;	
+		pulled.y = ship.y + 30 * dy / dist;
+		*/
 	}
 }

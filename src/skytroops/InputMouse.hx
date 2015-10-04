@@ -23,6 +23,10 @@ class InputMouse implements Input
 		target.y = e.rawY;
 	}
 	
+	public function getMoveDir() :Point
+	{
+		return null;
+	}
 	
 	public function getMoveTarget() :Point
 	{

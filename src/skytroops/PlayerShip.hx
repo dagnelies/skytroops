@@ -24,15 +24,15 @@ class PlayerShip extends Ship
 		weapon: {
 			spread: WeaponSpread.FRONTAL,
 			bullet: Bullets.BULLET,
-			shots: 1,
-			fire_rate: 2,
+			shots: 2,
+			fire_rate: 3,
 			aim: true
 		}
 	};
 	
 	public var collected_coins = 0;
 	var blades :Container;
-	var target :Shape;
+	//var target :Shape;
 	
 	public function new() 
 	{
@@ -49,10 +49,12 @@ class PlayerShip extends Ship
 		blades.y = -blades_img.height / 3;
 		addChild(blades);
 		
+		/*
 		target = new Shape();
 		target.graphics.beginFill("red").arc(0, 0, 6, 0, 2 * Math.PI, false);
 		//target.alpha = 0.7;
 		addChild(target);
+		*/
 		
 		scaleX = 1.2;
 		scaleY = 1.2;
@@ -60,8 +62,8 @@ class PlayerShip extends Ship
 	
 	public override function shoot(t :Point) :Array<Bullet>
 	{
-		target.x = 2*(t.x - this.x);
-		target.y = 2*(t.y - this.y);
+		//target.x = 2*(t.x - this.x);
+		//target.y = 2*(t.y - this.y);
 		return super.shoot(t);
 	}
 	

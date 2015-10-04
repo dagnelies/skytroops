@@ -89,7 +89,7 @@ class Ship extends Obj
 		var min = -(def.weapon.shots - 1) / 2;
 		
 		for ( i in 0...def.weapon.shots )
-			bullets.push( makeBullet((min + i)*15, 0, dir) );
+			bullets.push( makeBullet((min + i)*30, 0, dir) );
 			
 		return bullets;
 	}
