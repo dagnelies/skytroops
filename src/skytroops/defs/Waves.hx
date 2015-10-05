@@ -102,7 +102,7 @@ class Waves
 	
 	
 	public static var MINES :WaveDef = {
-		n: 4,
+		n: 3,
 		ship: Ships.MINE,
 		formation: Formation.HORIZONTAL,
 		from: Direction.TOP

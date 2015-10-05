@@ -962,6 +962,8 @@ skytroops_Resources.load = function() {
 		console.log(e2);
 		skytroops_Resources.onError("Failed to load " + e2.item.src);
 	});
+	skytroops_Resources.queue.loadFile("img/bg/map.png");
+	skytroops_Resources.queue.loadFile("img/gui/menu.png");
 	skytroops_Resources.queue.loadFile("img/bg/grass.png");
 	skytroops_Resources.queue.loadFile("img/bg/rocky.png");
 	skytroops_Resources.queue.loadFile("img/bg/islands.png");
@@ -1134,7 +1136,7 @@ skytroops_defs_Waves.__name__ = true;
 var skytroops_defs_Levels = function() { };
 skytroops_defs_Levels.__name__ = true;
 skytroops_defs_Levels.buildGrassLevel = function(n,diff) {
-	return skytroops_defs_Levels.buildCustomLevel(skytroops_defs_Levels.BG_GRASS,skytroops_defs_Levels.WAVES_GRASS[n],diff,60);
+	return skytroops_defs_Levels.buildSurvivalLevel(skytroops_defs_Levels.BG_GRASS);
 };
 skytroops_defs_Levels.buildCustomLevel = function(bg_img,waves,diff,duration) {
 	var t = 1.0;
@@ -1144,6 +1146,21 @@ skytroops_defs_Levels.buildCustomLevel = function(bg_img,waves,diff,duration) {
 		var w = waves[i];
 		level.spawns.push({ t : t, wave : w});
 		var dt = w.n * w.ship.xp / diff;
+		t += dt;
+	}
+	return level;
+};
+skytroops_defs_Levels.buildSurvivalLevel = function(bg_img) {
+	var t = 1.0;
+	var level = { bg_img : bg_img, spawns : []};
+	var waves = skytroops_defs_Levels.WAVES_GRASS[0];
+	while(t < 900) {
+		var i = Std.random(waves.length);
+		var w = waves[i];
+		level.spawns.push({ t : t, wave : w});
+		var diff = 0.5 + t / 60;
+		var dt = w.n * w.ship.xp / diff;
+		if(Math.random() < 0.1) waves = skytroops_defs_Levels.WAVES_GRASS[Std.random(skytroops_defs_Levels.WAVES_GRASS.length)];
 		t += dt;
 	}
 	return level;
@@ -1226,10 +1243,12 @@ skytroops_levels_Grass.__super__ = skytroops_levels_Level;
 skytroops_levels_Grass.prototype = $extend(skytroops_levels_Level.prototype,{
 });
 var skytroops_screens_LevelSelect = function() {
+	this.dots = [];
+	this.current_lvl = 0;
 	var _g2 = this;
 	createjs.Container.call(this);
-	var bmp = new createjs.Bitmap("img/bg/map.png");
-	this.addChild(bmp);
+	this.bg = new createjs.Bitmap(skytroops_Resources.get("img/bg/map.png"));
+	this.addChild(this.bg);
 	var _g = 0;
 	var _g1 = skytroops_screens_LevelSelect.DOTS;
 	while(_g < _g1.length) {
@@ -1246,12 +1265,27 @@ var skytroops_screens_LevelSelect = function() {
 		})(d);
 		this.addChild(icon);
 	}
+	this.center();
 };
 skytroops_screens_LevelSelect.__name__ = true;
 skytroops_screens_LevelSelect.__super__ = createjs.Container;
 skytroops_screens_LevelSelect.prototype = $extend(createjs.Container.prototype,{
 	onSelect: function(level) {
 		console.log("Level selected");
+	}
+	,win: function(lvl) {
+		if(lvl == this.current_lvl) {
+			this.current_lvl++;
+			this.center();
+		}
+	}
+	,center: function() {
+		var dot = skytroops_screens_LevelSelect.DOTS[this.current_lvl];
+		var h = this.bg.image.height;
+		var y = dot.y - skytroops_Game.HEIGHT / 2;
+		if(y < 0) y = 0;
+		if(y > h - skytroops_Game.HEIGHT) y = h - skytroops_Game.HEIGHT;
+		this.y = -y;
 	}
 });
 var skytroops_screens_Loading = function() {
@@ -1284,13 +1318,13 @@ var skytroops_screens_Menu = function() {
 	createjs.Container.call(this);
 	var bg = new createjs.Bitmap("img/gui/menu.png");
 	this.addChild(bg);
-	var easy = new skytroops_gui_Button("Play !");
-	easy.x = skytroops_Game.WIDTH / 2;
-	easy.y = 450;
-	easy.onBtnClicked = function() {
+	var play = new skytroops_gui_Button("Play !");
+	play.x = skytroops_Game.WIDTH / 2;
+	play.y = 450;
+	play.onBtnClicked = function() {
 		_g.onPlay();
 	};
-	this.addChild(easy);
+	this.addChild(play);
 	var github = new createjs.Bitmap("img/github.png");
 	github.x = skytroops_Game.WIDTH - 20 - 64;
 	github.y = 20;
@@ -1572,7 +1606,7 @@ skytroops_defs_Waves.UPLANE_III = { n : 5, ship : skytroops_defs_Ships.FOLLOWER,
 skytroops_defs_Waves.SHOOTER_I = { n : 1, ship : skytroops_defs_Ships.GUNNER, formation : skytroops_defs_Formation.HORIZONTAL, from : skytroops_defs_Direction.TOP};
 skytroops_defs_Waves.SHOOTER_II = { n : 2, ship : skytroops_defs_Ships.GUNNER, formation : skytroops_defs_Formation.HORIZONTAL, from : skytroops_defs_Direction.TOP, motion : skytroops_defs_Motion.SPREAD};
 skytroops_defs_Waves.SHOOTER_III = { n : 3, ship : skytroops_defs_Ships.GUNNER, formation : skytroops_defs_Formation.DOWN, from : skytroops_defs_Direction.TOP, motion : skytroops_defs_Motion.SPREAD};
-skytroops_defs_Waves.MINES = { n : 4, ship : skytroops_defs_Ships.MINE, formation : skytroops_defs_Formation.HORIZONTAL, from : skytroops_defs_Direction.TOP};
+skytroops_defs_Waves.MINES = { n : 3, ship : skytroops_defs_Ships.MINE, formation : skytroops_defs_Formation.HORIZONTAL, from : skytroops_defs_Direction.TOP};
 skytroops_defs_Waves.TANK_L_I = { n : 1, ship : skytroops_defs_Ships.TANK_LIGHT, formation : skytroops_defs_Formation.HORIZONTAL, from : skytroops_defs_Direction.TOP};
 skytroops_defs_Waves.TANK_H_I = { n : 1, ship : skytroops_defs_Ships.TANK_HEAVY, formation : skytroops_defs_Formation.HORIZONTAL, from : skytroops_defs_Direction.TOP};
 skytroops_defs_Levels.BG_GRASS = "img/bg/grass.png";
@@ -1580,7 +1614,7 @@ skytroops_defs_Levels.BG_ROCKY = "img/bg/rocky.png";
 skytroops_defs_Levels.BG_SNOW = "img/bg/snow.png";
 skytroops_defs_Levels.BG_DESERT = "img/bg/desert.png";
 skytroops_defs_Levels.BG_ISLANDS = "img/bg/islands.png";
-skytroops_defs_Levels.WAVES_GRASS = [[skytroops_defs_Waves.WEAKLING_I,skytroops_defs_Waves.WEAKLING_TL_I,skytroops_defs_Waves.WEAKLING_TR_I,skytroops_defs_Waves.UPLANE_I],[skytroops_defs_Waves.WEAKLING_II,skytroops_defs_Waves.WEAKLING_TL_II,skytroops_defs_Waves.WEAKLING_TR_II,skytroops_defs_Waves.UPLANE_II],[skytroops_defs_Waves.SHOOTER_I,skytroops_defs_Waves.WEAKLING_TL_I,skytroops_defs_Waves.WEAKLING_TR_I,skytroops_defs_Waves.UPLANE_I]];
+skytroops_defs_Levels.WAVES_GRASS = [[skytroops_defs_Waves.WEAKLING_I,skytroops_defs_Waves.WEAKLING_TL_I,skytroops_defs_Waves.WEAKLING_TR_I,skytroops_defs_Waves.UPLANE_I],[skytroops_defs_Waves.WEAKLING_II,skytroops_defs_Waves.WEAKLING_TL_II,skytroops_defs_Waves.WEAKLING_TR_II,skytroops_defs_Waves.UPLANE_II],[skytroops_defs_Waves.SHOOTER_I,skytroops_defs_Waves.WEAKLING_TL_I,skytroops_defs_Waves.WEAKLING_TR_I,skytroops_defs_Waves.UPLANE_I],[skytroops_defs_Waves.TANK_L_I,skytroops_defs_Waves.WEAKLING_TL_II,skytroops_defs_Waves.WEAKLING_TR_II,skytroops_defs_Waves.UPLANE_I],[skytroops_defs_Waves.TANK_H_I,skytroops_defs_Waves.WEAKLING_TL_II,skytroops_defs_Waves.WEAKLING_TR_II,skytroops_defs_Waves.MINES,skytroops_defs_Waves.UPLANE_I],[skytroops_defs_Waves.SHOOTER_III,skytroops_defs_Waves.MINES]];
 skytroops_defs_Levels.WAVES_ROCKY = [];
 skytroops_defs_Levels.WAVES_SNOW = [];
 skytroops_defs_Levels.WAVES_DESERT = [];
@@ -1588,14 +1622,34 @@ skytroops_defs_Levels.WAVES_ISLANDS = [];
 skytroops_levels_Grass.cooldown = 0;
 skytroops_levels_Grass.WAVES = [skytroops_defs_Waves.MINES,skytroops_defs_Waves.TANK_L_I,skytroops_defs_Waves.TANK_H_I];
 skytroops_levels_Grass.BG = "img/bg/grass.png";
-skytroops_screens_LevelSelect.DOTS = [{ x : 340, y : 176, level : function() {
+skytroops_screens_LevelSelect.DOTS = [{ x : 336, y : 2567, level : function() {
 	return skytroops_defs_Levels.buildGrassLevel(0,1);
-}},{ x : 259, y : 310, level : function() {
-	return skytroops_defs_Levels.buildGrassLevel(1,1.5);
-}},{ x : 346, y : 410, level : function() {
-	return skytroops_defs_Levels.buildGrassLevel(2,2);
-}},{ x : 492, y : 471, level : function() {
-	return skytroops_defs_Levels.buildGrassLevel(2,5);
+}},{ x : 209, y : 2541, level : function() {
+	return skytroops_defs_Levels.buildGrassLevel(0,1.5);
+}},{ x : 103, y : 2500, level : function() {
+	return skytroops_defs_Levels.buildGrassLevel(0,2);
+}},{ x : 101, y : 2388, level : function() {
+	return skytroops_defs_Levels.buildGrassLevel(1,2);
+}},{ x : 216, y : 2343, level : function() {
+	return skytroops_defs_Levels.buildGrassLevel(1,2.5);
+}},{ x : 338, y : 2277, level : function() {
+	return skytroops_defs_Levels.buildGrassLevel(1,3);
+}},{ x : 428, y : 2191, level : function() {
+	return skytroops_defs_Levels.buildGrassLevel(2,3);
+}},{ x : 283, y : 2156, level : function() {
+	return skytroops_defs_Levels.buildGrassLevel(2,3.5);
+}},{ x : 140, y : 2084, level : function() {
+	return skytroops_defs_Levels.buildGrassLevel(2,4);
+}},{ x : 239, y : 2002, level : function() {
+	return skytroops_defs_Levels.buildGrassLevel(0,1);
+}},{ x : 369, y : 1988, level : function() {
+	return skytroops_defs_Levels.buildGrassLevel(0,1);
+}},{ x : 497, y : 1975, level : function() {
+	return skytroops_defs_Levels.buildGrassLevel(0,1);
+}},{ x : 578, y : 1895, level : function() {
+	return skytroops_defs_Levels.buildGrassLevel(0,1);
+}},{ x : 433, y : 1774, level : function() {
+	return skytroops_defs_Levels.buildGrassLevel(0,1);
 }}];
 Main.main();
 })(typeof console != "undefined" ? console : {log:function(){}});

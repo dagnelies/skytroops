@@ -24,6 +24,8 @@ class Resources
 		queue.addEventListener("complete", function(e) { onFinished(); } );
 		queue.addEventListener("error", function(e) { trace(e);  onError("Failed to load " + e.item.src); } );
 		
+		queue.loadFile("img/bg/map.png");
+		queue.loadFile("img/gui/menu.png");
 		
 		queue.loadFile("img/bg/grass.png");
 		queue.loadFile("img/bg/rocky.png");

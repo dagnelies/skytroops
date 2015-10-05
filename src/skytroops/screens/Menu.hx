@@ -19,13 +19,13 @@ class Menu extends Container
 		var bg = new Bitmap("img/gui/menu.png");
 		addChild(bg);
 		
-		var easy = new Button("Play !");
-		easy.x = Game.WIDTH / 2;
-		easy.y = 450;
-		easy.onBtnClicked = function () {
+		var play = new Button("Play !");
+		play.x = Game.WIDTH / 2;
+		play.y = 450;
+		play.onBtnClicked = function () {
 			onPlay();
 		};
-		addChild(easy);
+		addChild(play);
 		
 		var github = new Bitmap("img/github.png");
 		github.x = Game.WIDTH - 20 - 64;
