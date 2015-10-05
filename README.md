@@ -20,22 +20,28 @@ You can use the multimedia assets for the development of this project. However, 
 
 # How to contribute?
 
-There are plenty of ways! If you've no idea where to start, the best is probably to investigate a little and expand this section. ;)
+There are plenty of ways! Just submit a ticket if you want to help, I'll assist you the best I can.
 
-## Misc TODOs
+## Non-programming related
 
-a web page with a chat/shoutbox/irc 
+* Just being here and leaving a comment is already nice
+* Try it out on all mobile devices to see if it behaves as expected
+* Some cool music (even MIDI perhaps?)
+* Better sound effects
+* A cool rotating coin
+* A better explosion sprite
+* A big boss picture
+* A better level picker map, featuring the 5 terrain types
+* Probably some UI stuff soon
 
+## Coding related
 
-* resize chopper imgs to 1.2 / bullet imgs to 1.5
-* level chooser
-* nicer buttons
-* health bar
-* player upgrades
-* make android/iphone versions
-* balancing ennemies/waves
-* bosses?
-* music/sounds
-* low def / high def?
-* update createjs lib
-* make the "defs" editable through javascript directly
+* If you want to help, just ask, I can probably lead you
+* A better level picker
+* A slick health bar
+* Player upgrades
+* Balancing ennemies/waves
+* Bosses?
+* Low def / high def versions?
+* Port it to OpenFl?
+* Make android/iphone versions
