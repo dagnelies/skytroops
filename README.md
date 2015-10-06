@@ -3,7 +3,7 @@ Demo: http://dagnelies.github.io/skytroops/bin/
 # Sky Troops...
 
 ...is a HTML5 game targeted at mobile and browsers alike.
-It is being developed in HaXe and CreateJS.
+It is being developed in Haxe and CreateJS.
 
 As an open source project, everyone is welcome to contribute.
 There are plenty of ways to improve it.

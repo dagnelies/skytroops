@@ -1,11 +1,12 @@
+Disclaimer: everything here may not be up to date!
+This is intended to be a rough overview, to get an idea of the code's organization and where to start.
+
 # Packages
 
 * `skytroops.defs` - The "parametrization" of everything (ships, bullets, levels...)
-* `skytroops.enemies` - Enemy Ships
 * `skytroops.gui` - GUI elements (button, label, coins, life bar...)
-* `skytroops.levels` - Game levels
 * `skytroops.screens` Game screens like (loading, menu, airport...)
-* `skytroops.stuff` - In-game "stuff" (player ship, bullet, ...)
+* `skytroops.game` - In-game objects (player ship, bullet, ...)
 * `skytroops.*` - Core classes (game, resources, sound, input...)
 
 # Tinkerer's guide
