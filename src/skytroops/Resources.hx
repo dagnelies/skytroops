@@ -25,6 +25,10 @@ class Resources
 		queue.addEventListener("error", function(e) { trace(e);  onError("Failed to load " + e.item.src); } );
 		
 		queue.loadFile("img/bg/map.png");
+		queue.loadFile("img/gui/dot_empty.png");
+		queue.loadFile("img/gui/dot_locked.png");
+		queue.loadFile("img/gui/dot_medal.png");
+		
 		queue.loadFile("img/gui/menu.png");
 		
 		queue.loadFile("img/bg/grass.png");

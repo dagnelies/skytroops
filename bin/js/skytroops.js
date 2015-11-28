@@ -963,6 +963,9 @@ skytroops_Resources.load = function() {
 		skytroops_Resources.onError("Failed to load " + e2.item.src);
 	});
 	skytroops_Resources.queue.loadFile("img/bg/map.png");
+	skytroops_Resources.queue.loadFile("img/gui/dot_empty.png");
+	skytroops_Resources.queue.loadFile("img/gui/dot_locked.png");
+	skytroops_Resources.queue.loadFile("img/gui/dot_medal.png");
 	skytroops_Resources.queue.loadFile("img/gui/menu.png");
 	skytroops_Resources.queue.loadFile("img/bg/grass.png");
 	skytroops_Resources.queue.loadFile("img/bg/rocky.png");
