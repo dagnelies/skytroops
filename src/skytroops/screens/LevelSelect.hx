@@ -19,60 +19,60 @@ class LevelSelect extends Container
 {
 	static var DOTS = [
 		{
-			x: 336,
-			y: 2567,
+			x: 306,
+			y: 2537,
 			level: function() { return Levels.buildGrassLevel(0, 1); }
 		},{
-			x: 209,
-			y: 2541,
+			x: 199,
+			y: 2511,
 			level: function() { return Levels.buildGrassLevel(0, 1.5); }
 		},{
-			x: 103,
-			y: 2500,
+			x: 93,
+			y: 2470,
 			level: function() { return Levels.buildGrassLevel(0, 2); }
 		},{
-			x: 101,
-			y: 2388,
+			x: 86,
+			y: 2358,
 			level: function() { return Levels.buildGrassLevel(1, 2); }
 		},{
-			x: 216,
-			y: 2343,
+			x: 196,
+			y: 2303,
 			level: function() { return Levels.buildGrassLevel(1, 2.5); }
 		},{
-			x: 338,
-			y: 2277,
+			x: 298,
+			y: 2247,
 			level: function() { return Levels.buildGrassLevel(1, 3); }
 		},{
-			x: 428,
-			y: 2191,
+			x: 398,
+			y: 2171,
 			level: function() { return Levels.buildGrassLevel(2, 3); }
 		},{
 			x: 283,
-			y: 2156,
+			y: 2126,
 			level: function() { return Levels.buildGrassLevel(2, 3.5); }
 		},{
 			x: 140,
-			y: 2084,
+			y: 2054,
 			level: function() { return Levels.buildGrassLevel(2, 4); }
 		},{
-			x: 239,
-			y: 2002,
+			x: 219,
+			y: 1952,
 			level: function() { return Levels.buildGrassLevel(0, 1); }
 		},{
-			x: 369,
-			y: 1988,
+			x: 359,
+			y: 1943,
 			level: function() { return Levels.buildGrassLevel(0, 1); }
 		},{
-			x: 497,
-			y: 1975,
+			x: 477,
+			y: 1925,
 			level: function() { return Levels.buildGrassLevel(0, 1); }
 		},{
-			x: 578,
-			y: 1895,
+			x: 548,
+			y: 1845,
 			level: function() { return Levels.buildGrassLevel(0, 1); }
 		},{
 			x: 433,
-			y: 1774,
+			y: 1747,
 			level: function() { return Levels.buildGrassLevel(0, 1); }
 		}/*,{
 			x: 247,
